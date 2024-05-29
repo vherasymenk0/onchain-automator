@@ -13,7 +13,7 @@
     "run": "npx ts-node src/index.ts",
     "dev": "npx nodemon",
     "build": "rimraf ./build && webpack --config webpack.config.js",
-    "start": "node build/index.js",
+    "start": "npx ts-node src/index.ts",
     "type-check": "tsc --project tsconfig.json --pretty --noEmit",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
