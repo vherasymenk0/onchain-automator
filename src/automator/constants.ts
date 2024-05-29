@@ -9,6 +9,7 @@ export const BOT_MASTER_AXIOS_CONFIG = {
     Referer: `${config.info.origin}/`,
     Priority: 'u=1, i',
     'Sec-Fetch-Dest': 'empty',
+    'Retry-Count': '10',
     'Sec-Fetch-Mode': 'cors',
     'Sec-Fetch-Site': 'same-origin',
   },

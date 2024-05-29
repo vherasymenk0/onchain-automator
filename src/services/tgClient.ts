@@ -59,9 +59,6 @@ export class TGClient {
     const { userName, origin } = config.info
     const { name } = this.client
 
-    const cachedWebData = this.getCachedWebData()
-    if (cachedWebData) return cachedWebData
-
     const client = await this.getClient()
     await wait()
     const userEntity = await client.getEntity(userName)

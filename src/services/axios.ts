@@ -1,6 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosError } from 'axios'
 import axiosRetry from 'axios-retry'
-import { ErrorModel } from '~/interfaces'
 
 type Handler = <TData>(url: string, config?: AxiosRequestConfig) => Promise<TData>
 type Props = {
@@ -18,7 +17,7 @@ export class Axios {
         Accept: '*/*',
         ...props?.config?.headers,
       },
-      timeout: 1000 * 15,
+      timeout: 1000 * 150,
     })
 
     this.instance.interceptors.response.use(
@@ -27,13 +26,25 @@ export class Axios {
         const isAxiosError = error instanceof AxiosError
         if (!isAxiosError) throw new Error(String(error))
 
-        const errorInfo = error?.response?.data as ErrorModel
-        const isApiError = errorInfo?.error_code && errorInfo?.error_message
+        const errorInfo = error?.response?.data?.error
 
-        if (isApiError)
-          throw new Error(
-            `api_code: ${errorInfo.error_code} | api_message: ${errorInfo.error_message}`,
-          )
+        if (errorInfo) throw new Error(`api_message: ${errorInfo}`)
+
+        axiosRetry(this.instance, {
+          retries: 10,
+          retryDelay: (...arg) => axiosRetry.exponentialDelay(...arg, 3000),
+          retryCondition(e) {
+            const { ERR_NETWORK, ETIMEDOUT, ECONNABORTED, ERR_CANCELED } = AxiosError
+            const serverErrors = [ERR_NETWORK, ETIMEDOUT, ECONNABORTED, ERR_CANCELED]
+            if (e.code && serverErrors.includes(e.code)) return true
+
+            const statusCode = e?.response?.status
+            if (!statusCode) return false
+
+            const retryErrorCodes = [408, 429, 502, 503, 504]
+            return retryErrorCodes.includes(statusCode)
+          },
+        })
 
         if (error.code === AxiosError.ECONNABORTED) {
           axiosRetry(this.instance, {

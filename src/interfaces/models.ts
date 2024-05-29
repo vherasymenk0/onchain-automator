@@ -37,8 +37,3 @@ export interface IpInfoModel {
   postal: string
   timezone: string
 }
-
-export interface ErrorModel {
-  error_code: string
-  error_message: string
-}

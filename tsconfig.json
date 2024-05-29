@@ -10,7 +10,7 @@
     "paths": {
       "~/*": ["src/*"]
     },
-    "lib": ["es5", "es6", "es7"],
+    "lib": ["es5", "es6", "es7", "dom"],
     "allowJs": true,
     "outDir": "build",
     "rootDir": "src",
