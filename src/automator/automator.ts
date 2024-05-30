@@ -104,11 +104,8 @@ export class Automator extends TGClient {
             continue
           }
 
-          if (!this.isStateInit) {
-            await this.setProfileInfo()
-            await wait()
-            continue
-          }
+          await this.setProfileInfo()
+          await wait(5)
 
           if (energy >= min_energy) {
             const [min, max] = sleep_between_taps
@@ -128,10 +125,7 @@ export class Automator extends TGClient {
 
           const [min, max] = sleep_by_min_energy
           const sleepTime = getRandomRangeNumber(min, max)
-          log.warn(
-            `Minimum energy reached, sleep ${sleepTime}s | Energy: ${energy}`,
-            this.client.name,
-          )
+          log.warn(`Minimum energy reached, sleep ${sleepTime}s`, this.client.name)
           await wait(sleepTime)
         } catch (e) {
           log.error(String(e), this.client.name)

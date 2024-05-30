@@ -27,43 +27,23 @@ export class Axios {
         if (!isAxiosError) throw new Error(String(error))
 
         const errorInfo = error?.response?.data?.error
-
         if (errorInfo) throw new Error(`api_message: ${errorInfo}`)
 
-        axiosRetry(this.instance, {
-          retries: 10,
-          retryDelay: (...arg) => axiosRetry.exponentialDelay(...arg, 3000),
-          retryCondition(e) {
-            const { ERR_NETWORK, ETIMEDOUT, ECONNABORTED, ERR_CANCELED } = AxiosError
-            const serverErrors = [ERR_NETWORK, ETIMEDOUT, ECONNABORTED, ERR_CANCELED]
-            if (e.code && serverErrors.includes(e.code)) return true
-
-            const statusCode = e?.response?.status
-            if (!statusCode) return false
-
-            const retryErrorCodes = [408, 429, 502, 503, 504]
-            return retryErrorCodes.includes(statusCode)
-          },
-        })
-
-        if (error.code === AxiosError.ECONNABORTED) {
-          axiosRetry(this.instance, {
-            retries: 3,
-
-            retryDelay: (...arg) => axiosRetry.exponentialDelay(...arg, 3000),
-            retryCondition(e) {
-              const statusCode = e?.response?.status
-              if (!statusCode) return false
-
-              const retryErrorCodes = [429, 502, 503, 504]
-              return retryErrorCodes.includes(statusCode)
-            },
-          })
-        }
-
-        throw new Error(error.message)
+        throw error
       },
     )
+
+    axiosRetry(this.instance, {
+      retries: 10,
+      retryDelay: (...arg) => axiosRetry.exponentialDelay(...arg, 3000),
+      retryCondition(e) {
+        const statusCode = e?.response?.status
+        if (!statusCode) return false
+        const retryErrorCodes = [408, 425, 429, 499, 502, 503, 504]
+
+        return retryErrorCodes.includes(statusCode)
+      },
+    })
   }
 
   async makeRequest(method: string, url: string, options: AxiosRequestConfig = {}) {
